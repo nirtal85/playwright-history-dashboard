@@ -1,3 +1,6 @@
+smoke-output/
+test-results/
+*.tgz
 .idea/
 .tmp/
 dist/

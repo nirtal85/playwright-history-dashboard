@@ -17,7 +17,8 @@
                     "test":  "npm run build:test \u0026\u0026 node --test \".tmp/test/test/**/*.test.js\"",
                     "check":  "npm run build \u0026\u0026 npm test",
                     "prepack":  "npm run build",
-                    "build:test":  "tsc -p tsconfig.test.json"
+                    "build:test":  "tsc -p tsconfig.test.json",
+                    "smoke:playwright":  "npm run build && tsc -p tsconfig.smoke.json && node .tmp/smoke/scripts/smoke-playwright-history.js"
                 },
     "keywords":  [
                      "playwright",
@@ -37,6 +38,7 @@
                   "LICENSE"
               ],
     "devDependencies":  {
+                            "@playwright/test":  "^1.61.1",
                             "@types/node":  "^22.0.0",
                             "typescript":  "^5.5.0"
                         }

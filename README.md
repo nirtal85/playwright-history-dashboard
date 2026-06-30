@@ -63,6 +63,17 @@ Open locally with any static server:
 python -m http.server 8080 --directory history-dashboard
 ```
 
+## Local Smoke Check
+
+This repo includes a real Playwright smoke flow with one passing test and one intentionally failing test:
+
+```bash
+npm run smoke:playwright
+python -m http.server 8080 --directory smoke-output/history-dashboard
+```
+
+The command expects Playwright to fail, then builds the dashboard from the JSON reporter output and verifies that `history.json` contains both `passed` and `failed` rows.
+
 ## GitHub Pages Shape
 
 Recommended published layout:
