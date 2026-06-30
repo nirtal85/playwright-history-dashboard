@@ -1,0 +1,46 @@
+{
+  "config": {
+    "metadata": {
+      "environment": "dev"
+    }
+  },
+  "suites": [
+    {
+      "title": "checkout.spec.ts",
+      "file": "tests/checkout.spec.ts",
+      "specs": [
+        {
+          "title": "customer can pay",
+          "tests": [
+            {
+              "projectName": "chromium",
+              "results": [
+                {
+                  "status": "passed",
+                  "startTime": "2026-06-29T10:00:00.000Z",
+                  "duration": 982
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "customer sees receipt",
+          "tests": [
+            {
+              "projectName": "chromium",
+              "results": [
+                {
+                  "status": "failed",
+                  "startTime": "2026-06-29T10:02:00.000Z",
+                  "duration": 1400,
+                  "error": { "message": "Expected receipt to be visible" }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

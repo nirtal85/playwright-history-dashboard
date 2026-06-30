@@ -1,0 +1,51 @@
+name: Publish Playwright History Dashboard
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  test-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npx playwright install --with-deps
+      - run: npx playwright test
+
+      - name: Build history dashboard
+        run: |
+          npx playwright-history-dashboard \
+            --input playwright-report/results.json \
+            --out pages/history \
+            --history pages/history/history.json \
+            --report-name web \
+            --environment dev \
+            --base-url ../reports/${{ github.run_id }}/ \
+            --build ${{ github.run_id }}
+
+      - name: Copy Playwright HTML report beside dashboard
+        run: |
+          mkdir -p pages/reports/${{ github.run_id }}
+          cp -R playwright-report/. pages/reports/${{ github.run_id }}/
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: pages
+      - uses: actions/deploy-pages@v4
