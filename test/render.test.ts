@@ -3,6 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import vm from "node:vm";
 import { writeDashboard } from "../src/render.js";
 import type { HistoryRow } from "../src/types.js";
 
@@ -31,4 +32,7 @@ test("writes static dashboard files and escapes embedded data", () => {
   assert.deepEqual(history, rows);
   assert.match(html, /Test Shift/);
   assert.doesNotMatch(html, /<script>alert/);
+  const script = html.match(/<script>([\s\S]*)<\/script>/)?.[1];
+  assert.ok(script);
+  assert.doesNotThrow(() => new vm.Script(script), script);
 });

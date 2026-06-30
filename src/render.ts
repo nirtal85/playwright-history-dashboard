@@ -68,7 +68,7 @@ small { color: var(--muted); }
 </main>
 <script>
 const state = { rows: [], latestIdsByEnv: new Map() };
-const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\\\"": "&quot;", "'": "&#39;" }[char]));
+const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
 const byId = (id) => document.getElementById(id);
 function latestCatalog(rows) {
   const latest = new Map();
@@ -93,20 +93,20 @@ function render() {
   byId("rows").innerHTML = rows.length ? rows.map((row) => {
     const detail = esc(row.file || row.project || "");
     const build = row.build ? " build " + esc(row.build) : "";
-    const report = row.reportUrl ? "<a href=\"" + esc(row.reportUrl) + "\" target=\"_blank\" rel=\"noreferrer\">Open report</a>" : "-";
-    return "<tr><td>" + esc(row.testName) + "<br><small>" + detail + "</small></td><td>" + esc(new Date(row.executionDateTime).toLocaleString()) + "<br><small>" + esc(row.reportName || "") + build + "</small></td><td>" + esc(row.environment || "unknown") + "</td><td><span class=\"status " + esc(row.status || "unknown") + "\">" + esc(row.status || "unknown") + "</span></td><td>" + report + "</td></tr>";
-  }).join("") : "<tr><td colspan=\"5\"><div class=\"empty\">No matching history rows.</div></td></tr>";
+    const report = row.reportUrl ? "<a href=\\"" + esc(row.reportUrl) + "\\" target=\\"_blank\\" rel=\\"noreferrer\\">Open report</a>" : "-";
+    return "<tr><td>" + esc(row.testName) + "<br><small>" + detail + "</small></td><td>" + esc(new Date(row.executionDateTime).toLocaleString()) + "<br><small>" + esc(row.reportName || "") + build + "</small></td><td>" + esc(row.environment || "unknown") + "</td><td><span class=\\"status " + esc(row.status || "unknown") + "\\">" + esc(row.status || "unknown") + "</span></td><td>" + report + "</td></tr>";
+  }).join("") : "<tr><td colspan=\\"5\\"><div class=\\"empty\\">No matching history rows.</div></td></tr>";
 }
 fetch("history.json", { cache: "no-store" }).then((res) => res.json()).then((rows) => {
   state.rows = rows;
   state.latestIdsByEnv = latestCatalog(rows);
   byId("loadedAt").textContent = "Loaded " + rows.length + " rows";
-  for (const env of [...new Set(rows.map((row) => row.environment || "unknown"))].sort()) byId("environmentFilter").insertAdjacentHTML("beforeend", "<option value=\"" + esc(env) + "\">" + esc(env) + "</option>");
-  for (const status of [...new Set(rows.map((row) => row.status || "unknown"))].sort()) byId("statusFilter").insertAdjacentHTML("beforeend", "<option value=\"" + esc(status) + "\">" + esc(status) + "</option>");
+  for (const env of [...new Set(rows.map((row) => row.environment || "unknown"))].sort()) byId("environmentFilter").insertAdjacentHTML("beforeend", "<option value=\\"" + esc(env) + "\\">" + esc(env) + "</option>");
+  for (const status of [...new Set(rows.map((row) => row.status || "unknown"))].sort()) byId("statusFilter").insertAdjacentHTML("beforeend", "<option value=\\"" + esc(status) + "\\">" + esc(status) + "</option>");
   ["nameFilter", "environmentFilter", "statusFilter"].forEach((id) => byId(id).addEventListener("input", render));
   render();
 }).catch((error) => {
-  byId("summary").innerHTML = "<span class=\"failed\">Failed to load history.json: " + esc(error.message) + "</span>";
+  byId("summary").innerHTML = "<span class=\\"failed\\">Failed to load history.json: " + esc(error.message) + "</span>";
 });</script>
 </body>
 </html>
