@@ -1,29 +1,34 @@
+#!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { mergeHistory } from "./history.js";
 import { extractRowsFromPlaywrightJson } from "./playwright-json.js";
 import { writeDashboard } from "./render.js";
+import type { HistoryRow } from "./types.js";
 
-export function runCli(argv = process.argv.slice(2)) {
+type CliArgs = Record<string, string | boolean | undefined>;
+
+export function runCli(argv: string[] = process.argv.slice(2)): number {
   const args = parseArgs(argv);
   if (args.help) {
     process.stdout.write(helpText());
     return 0;
   }
-  if (!args.input || !args.out) {
+  if (!args.input || !args.out || typeof args.input !== "string" || typeof args.out !== "string") {
     process.stderr.write("Missing required --input and --out.\n\n" + helpText());
     return 1;
   }
 
   const inputPath = path.resolve(args.input);
   const outDir = path.resolve(args.out);
-  const historyPath = path.resolve(args.history || path.join(outDir, "history.json"));
-  const report = JSON.parse(fs.readFileSync(inputPath, "utf8"));
-  const currentRows = extractRowsFromPlaywrightJson(report, {
-    reportName: args["report-name"] || "",
-    environment: args.environment,
-    baseUrl: args["base-url"] || "",
-    build: args.build || process.env.GITHUB_RUN_ID || process.env.CIRCLE_BUILD_NUM || ""
+  const historyPath = path.resolve(asString(args.history) || path.join(outDir, "history.json"));
+  const report = JSON.parse(fs.readFileSync(inputPath, "utf8")) as unknown;
+  const currentRows = extractRowsFromPlaywrightJson(report as never, {
+    reportName: asString(args["report-name"]) || "",
+    environment: asString(args.environment),
+    baseUrl: asString(args["base-url"]) || "",
+    build: asString(args.build) || process.env.GITHUB_RUN_ID || process.env.CIRCLE_BUILD_NUM || ""
   });
   const existingRows = readExistingHistory(historyPath);
   const rows = mergeHistory({ existingRows, currentRows, days: Number(args.days || 14) });
@@ -33,8 +38,8 @@ export function runCli(argv = process.argv.slice(2)) {
   return 0;
 }
 
-function parseArgs(argv) {
-  const args = {};
+function parseArgs(argv: string[]): CliArgs {
+  const args: CliArgs = {};
   for (let index = 0; index < argv.length; index += 1) {
     const token = argv[index];
     if (token === "--help" || token === "-h") {
@@ -53,12 +58,20 @@ function parseArgs(argv) {
   return args;
 }
 
-function readExistingHistory(historyPath) {
+function readExistingHistory(historyPath: string): HistoryRow[] {
   if (!fs.existsSync(historyPath)) return [];
-  const parsed = JSON.parse(fs.readFileSync(historyPath, "utf8"));
-  return Array.isArray(parsed) ? parsed : [];
+  const parsed = JSON.parse(fs.readFileSync(historyPath, "utf8")) as unknown;
+  return Array.isArray(parsed) ? parsed as HistoryRow[] : [];
 }
 
-function helpText() {
+function asString(value: string | boolean | undefined): string | undefined {
+  return typeof value === "string" ? value : undefined;
+}
+
+function helpText(): string {
   return `Usage:\n  playwright-history-dashboard --input playwright-report/results.json --out history-dashboard [options]\n\nOptions:\n  --input <file>          Playwright JSON reporter output. Required.\n  --out <dir>             Output directory for index.html and history.json. Required.\n  --history <file>        Existing history JSON. Default: <out>/history.json.\n  --report-name <name>    Label for this report/run.\n  --environment <name>    Environment label. Falls back to JSON metadata or unknown.\n  --base-url <url>        URL to the Playwright HTML report for this run.\n  --build <id>            Build/run id. Falls back to common CI env vars.\n  --days <number>         Retention window. Default: 14.\n`;
+}
+
+if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
+  process.exitCode = runCli();
 }

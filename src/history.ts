@@ -1,4 +1,13 @@
-export function mergeHistory({ existingRows = [], currentRows = [], days = 14, now = new Date() } = {}) {
+import type { HistoryRow } from "./types.js";
+
+interface MergeHistoryOptions {
+  existingRows?: HistoryRow[];
+  currentRows?: HistoryRow[];
+  days?: number;
+  now?: Date;
+}
+
+export function mergeHistory({ existingRows = [], currentRows = [], days = 14, now = new Date() }: MergeHistoryOptions = {}): HistoryRow[] {
   const currentBuilds = new Set(currentRows.map((row) => row.build).filter(Boolean));
   const retainedExisting = currentBuilds.size > 0
     ? existingRows.filter((row) => !currentBuilds.has(row.build))
@@ -13,8 +22,8 @@ export function mergeHistory({ existingRows = [], currentRows = [], days = 14, n
     .sort((left, right) => String(right.executionDateTime).localeCompare(String(left.executionDateTime)));
 }
 
-export function latestCatalogRows(rows = []) {
-  const latestRunByEnvironment = new Map();
+export function latestCatalogRows(rows: HistoryRow[] = []): HistoryRow[] {
+  const latestRunByEnvironment = new Map<string, HistoryRow>();
 
   for (const row of rows) {
     const environment = row.environment || "unknown";
@@ -32,7 +41,7 @@ export function latestCatalogRows(rows = []) {
   });
 }
 
-function compareRows(left, right) {
+function compareRows(left: HistoryRow, right: HistoryRow): number {
   const byDate = String(left.executionDateTime).localeCompare(String(right.executionDateTime));
   if (byDate !== 0) return byDate;
   return String(left.build ?? "").localeCompare(String(right.build ?? ""), undefined, { numeric: true });

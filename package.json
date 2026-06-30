@@ -1,31 +1,43 @@
 {
-  "name": "@test-shift/playwright-history-dashboard",
-  "version": "0.1.0",
-  "description": "Static Playwright execution history dashboard from the native JSON reporter output.",
-  "type": "module",
-  "bin": {
-    "playwright-history-dashboard": "./bin/playwright-history-dashboard.js"
-  },
-  "scripts": {
-    "test": "node --test",
-    "check": "node --check bin/playwright-history-dashboard.js && node --check src/playwright-json.js && node --check src/history.js && node --check src/render.js && node --check src/cli.js"
-  },
-  "keywords": [
-    "playwright",
-    "test-history",
-    "dashboard",
-    "github-pages",
-    "test-shift"
-  ],
-  "author": "Test Shift",
-  "license": "MIT",
-  "engines": {
-    "node": ">=20"
-  },
-  "files": [
-    "bin",
-    "src",
-    "README.md",
-    "LICENSE"
-  ]
+    "name":  "@test-shift/playwright-history-dashboard",
+    "version":  "0.1.0",
+    "description":  "Static Playwright execution history dashboard from the native JSON reporter output.",
+    "type":  "module",
+    "bin":  {
+                "playwright-history-dashboard":  "./dist/cli.js"
+            },
+    "exports":  {
+                    ".":  {
+                              "types":  "./dist/index.d.ts",
+                              "default":  "./dist/index.js"
+                          }
+                },
+    "scripts":  {
+                    "build":  "tsc -p tsconfig.json",
+                    "test":  "npm run build:test \u0026\u0026 node --test \".tmp/test/test/**/*.test.js\"",
+                    "check":  "npm run build \u0026\u0026 npm test",
+                    "prepack":  "npm run build",
+                    "build:test":  "tsc -p tsconfig.test.json"
+                },
+    "keywords":  [
+                     "playwright",
+                     "test-history",
+                     "dashboard",
+                     "github-pages",
+                     "test-shift"
+                 ],
+    "author":  "Test Shift",
+    "license":  "MIT",
+    "engines":  {
+                    "node":  "\u003e=20"
+                },
+    "files":  [
+                  "dist",
+                  "README.md",
+                  "LICENSE"
+              ],
+    "devDependencies":  {
+                            "@types/node":  "^22.0.0",
+                            "typescript":  "^5.5.0"
+                        }
 }

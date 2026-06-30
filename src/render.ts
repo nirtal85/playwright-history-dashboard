@@ -1,13 +1,19 @@
 import fs from "node:fs";
 import path from "node:path";
+import type { HistoryRow } from "./types.js";
 
-export function writeDashboard({ outDir, rows }) {
+interface WriteDashboardOptions {
+  outDir: string;
+  rows: HistoryRow[];
+}
+
+export function writeDashboard({ outDir, rows }: WriteDashboardOptions): void {
   fs.mkdirSync(outDir, { recursive: true });
   fs.writeFileSync(path.join(outDir, "history.json"), `${JSON.stringify(rows, null, 2)}\n`);
   fs.writeFileSync(path.join(outDir, "index.html"), dashboardHtml());
 }
 
-function dashboardHtml() {
+function dashboardHtml(): string {
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -106,4 +112,3 @@ fetch("history.json", { cache: "no-store" }).then((res) => res.json()).then((row
 </html>
 `;
 }
-
