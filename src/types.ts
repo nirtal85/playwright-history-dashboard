@@ -12,8 +12,21 @@ export interface HistoryRow {
   reportName: string;
   status: TestStatus;
   failureMessage: string;
+  failureSnippet?: string;
+  errorFile?: string;
+  errorLine?: number;
+  errorColumn?: number;
+  retry?: number;
+  expectedStatus?: string;
+  attachments?: HistoryAttachment[];
   reportUrl: string;
   build: string;
+}
+
+export interface HistoryAttachment {
+  name: string;
+  contentType: string;
+  path: string;
 }
 
 export interface ExtractOptions {

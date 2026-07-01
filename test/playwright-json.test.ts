@@ -15,12 +15,18 @@ test("extracts execution rows from Playwright JSON reporter output", () => {
             tests: [
               {
                 projectName: "chromium",
+                expectedStatus: "passed",
                 results: [
                   {
                     status: "failed",
                     startTime: "2026-06-29T10:00:00.000Z",
                     duration: 1234,
-                    error: { message: "expect(locator).toBeVisible failed" },
+                    retry: 1,
+                    error: {
+                      message: "expect(locator).toBeVisible failed",
+                      snippet: "> 12 | await expect(locator).toBeVisible();",
+                      location: { file: "tests/checkout.spec.ts", line: 12, column: 18 }
+                    },
                     attachments: [{ name: "trace", path: "test-results/trace.zip" }]
                   }
                 ]
@@ -52,6 +58,17 @@ test("extracts execution rows from Playwright JSON reporter output", () => {
       reportName: "web_nightly",
       status: "failed",
       failureMessage: "expect(locator).toBeVisible failed",
+      failureSnippet: "> 12 | await expect(locator).toBeVisible();",
+      errorFile: "tests/checkout.spec.ts",
+      errorLine: 12,
+      errorColumn: 18,
+      retry: 1,
+      expectedStatus: "passed",
+      attachments: [{
+        name: "trace",
+        contentType: "",
+        path: "test-results/trace.zip"
+      }],
       reportUrl: "https://example.github.io/app/reports/42/",
       build: "42"
     }

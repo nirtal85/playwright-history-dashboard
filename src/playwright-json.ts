@@ -14,11 +14,16 @@ interface PlaywrightSuite {
 
 interface PlaywrightSpec {
   title?: string;
+  tags?: string[];
+  file?: string;
+  line?: number;
+  column?: number;
   tests?: PlaywrightTestCase[];
 }
 
 interface PlaywrightTestCase {
   projectName?: string;
+  expectedStatus?: string;
   results?: PlaywrightResult[];
 }
 
@@ -28,13 +33,30 @@ interface PlaywrightResult {
   start?: string | number;
   stop?: string | number;
   duration?: number;
+  retry?: number;
   error?: PlaywrightError;
   errors?: PlaywrightError[];
+  errorLocation?: PlaywrightLocation;
+  attachments?: PlaywrightAttachment[];
 }
 
 interface PlaywrightError {
   message?: string;
   value?: string;
+  snippet?: string;
+  location?: PlaywrightLocation;
+}
+
+interface PlaywrightLocation {
+  file?: string;
+  line?: number;
+  column?: number;
+}
+
+interface PlaywrightAttachment {
+  name?: string;
+  contentType?: string;
+  path?: string;
 }
 
 interface SpecVisit {
@@ -56,6 +78,8 @@ export function extractRowsFromPlaywrightJson(report: PlaywrightJsonReport, opti
       for (const testCase of spec.tests ?? []) {
         const project = testCase.projectName ?? "";
         for (const result of testCase.results ?? []) {
+          const error = result.error ?? result.errors?.[0];
+          const errorLocation = result.errorLocation ?? error?.location;
           rows.push({
             schemaVersion: "1.0",
             testId: buildTestId({ file, suitePath, testName, project }),
@@ -68,6 +92,19 @@ export function extractRowsFromPlaywrightJson(report: PlaywrightJsonReport, opti
             reportName,
             status: normalizeStatus(result.status),
             failureMessage: firstFailureMessage(result),
+            failureSnippet: String(error?.snippet ?? ""),
+            errorFile: errorLocation?.file ?? spec.file ?? file,
+            errorLine: finiteNumber(errorLocation?.line ?? spec.line),
+            errorColumn: finiteNumber(errorLocation?.column ?? spec.column),
+            retry: finiteNumber(result.retry),
+            expectedStatus: testCase.expectedStatus ?? "",
+            attachments: (result.attachments ?? [])
+              .filter((attachment) => attachment.name || attachment.path)
+              .map((attachment) => ({
+                name: String(attachment.name ?? "attachment"),
+                contentType: String(attachment.contentType ?? ""),
+                path: String(attachment.path ?? "")
+              })),
             reportUrl,
             build
           });
@@ -122,6 +159,10 @@ function normalizeStatus(status: string | undefined): TestStatus {
 function firstFailureMessage(result: PlaywrightResult): string {
   const error = result.error ?? result.errors?.[0];
   return String(error?.message ?? error?.value ?? "");
+}
+
+function finiteNumber(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
 }
 
 function toIso(value: string | number | Date): string {

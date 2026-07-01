@@ -6,7 +6,8 @@ This first version is intentionally small:
 
 - Reads one Playwright JSON reporter file.
 - Merges it into a rolling `history.json`.
-- Writes a static `index.html` dashboard.
+- Writes a static `index.html` control tower.
+- Shows latest-run summary cards, failed-first rows, failure grouping, per-test trend, and expandable failure details.
 - Works with GitHub Pages.
 - Does not require Allure, a database, a server, or a GitHub App.
 
@@ -88,6 +89,8 @@ pages-root/
 ```
 
 The dashboard rows link to the Playwright HTML report through `--base-url`.
+
+The dashboard is not a replacement for the Playwright HTML report. It is the history and triage layer above it. Keep publishing the Playwright HTML report and pass its URL through `--base-url`.
 
 ## GitHub Actions Example
 
